@@ -98,6 +98,124 @@ around 'open311_config' => sub {
     $self->$orig($row, $h, $params);
 };
 
+sub get_body_sender {
+    my ($self, $body, $problem) = @_;
+    my %flytipping_cats = map { $_ => 1 } @{ $self->_flytipping_categories };
+
+    my ($x, $y) = Utils::convert_latlon_to_en(
+        $problem->latitude,
+        $problem->longitude,
+        'G'
+    );
+    if ( $flytipping_cats{ $problem->category } ) {
+        # look for land belonging to the council
+        my $features = $self->_fetch_features(
+            {
+                type => 'arcgis',
+                url => 'https://peterborough.assets/2/query?',
+                buffer => 10,
+            },
+            $x,
+            $y,
+        );
+
+        # if not then check if it's land leased out or on a road.
+        unless ( $features && scalar $features ) {
+            $features = $self->_fetch_features(
+                {
+                    type => 'arcgis',
+                    url => 'https://peterborough.assets/3/query?',
+                    buffer => 10,
+                },
+                $x,
+                $y,
+            );
+
+            # some PCC land is leased out and not dealt with in bartec
+            $features = [] if $features && scalar @$features;
+
+            $features = $self->_fetch_features(
+                {
+                    buffer => 10, # metres
+                    url => "https://tilma.mysociety.org/mapserver/peterborough",
+                    srsname => "urn:ogc:def:crs:EPSG::27700",
+                    typename => "highways",
+                    property => "Usrn",
+                    accept_feature => sub { 1 },
+                    accept_types => { Polygon => 1 },
+                },
+                $x,
+                $y,
+            );
+        }
+
+        # is on land that is handled by bartec so send
+        if ( $features && scalar @$features ) {
+            return $self->SUPER::get_body_sender($body, $problem);
+        }
+
+        # neither of those so just send email for records
+        my $emails = $self->feature('open311_email');
+        if ( $emails->{flytipping} ) {
+            my $contact = $self->SUPER::get_body_sender($body, $problem)->{contact};
+            $problem->set_extra_metadata('flytipping_email' => $emails->{flytipping});
+            $problem->update;
+            return { method => 'Email', contact => $contact};
+        }
+    }
+
+    return $self->SUPER::get_body_sender($body, $problem);
+}
+
+sub munge_sendreport_params {
+    my ($self, $row, $h, $params) = @_;
+
+    if ( $row->get_extra_metadata('flytipping_email') ) {
+        $params->{To} = [ [
+            $row->get_extra_metadata('flytipping_email'), $self->council_name
+        ] ];
+    }
+}
+
+sub post_report_sent {
+    my ($self, $problem) = @_;
+
+    if ( $problem->get_extra_metadata('flytipping_email') ) {
+        $problem->update({
+            state => 'closed'
+        });
+        FixMyStreet::DB->resultset('Comment')->create({
+            user_id => $self->body->comment_user_id,
+            problem => $problem,
+            state => 'confirmed',
+            cobrand => $problem->cobrand,
+            cobrand_data => '',
+            problem_state => 'closed',
+            # XXX need message here
+            text => '',
+        });
+    }
+}
+
+sub _fetch_features_url {
+    my ($self, $cfg) = @_;
+    my $uri = URI->new( $cfg->{url} );
+    if ( $cfg->{arcgis} ) {
+        $uri->query_form(
+            inSR => 27700,
+            outSR => 3857,
+            f => "geojson",
+            geometry => $cfg->{bbox},
+        );
+        return URI->new(
+            'https://tilma.mysociety.org/resource-proxy/proxy.php?' .
+            $uri
+        );
+    } else {
+        return $self->SUPER::_fetch_features_url($cfg);
+    }
+}
+
 sub dashboard_export_problems_add_columns {
     my ($self, $csv) = @_;
 
@@ -119,5 +237,12 @@ sub dashboard_export_problems_add_columns {
         };
     });
 }
+
+sub _flytipping_categories { [
+    "General fly tipping",
+    "Hazardous fly tipping",
+    "Non offensive graffiti",
+    "Offensive graffiti",
+] }
 
 1;
