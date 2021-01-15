@@ -561,12 +561,22 @@ has_page about_property => (
         hide => sub { $_[0]->form->value_nequals('what', 2); }
     },
     next => 'damage_property',
+    update_field_list => sub {
+        my ($form) = @_;
+        my $fields = {};
+        $form->handle_upload( 'property_insurance', $fields );
+        return $fields;
+    },
 );
 
 has_field property_insurance => (
-    required => 1,
     type => 'Upload',
     label => 'Please provide a copy of the home/contents insurance certificate',
+    validate_method => sub {
+        my $self = shift;
+        my $c = $self->form->{c};
+        return 1 if $c->req->upload('property_insurance');
+    }
 );
 
 has_page damage_property => (
@@ -580,6 +590,7 @@ has_page damage_property => (
         my ($form) = @_;
         my $fields = {};
         $form->update_photo('property_photos', $fields);
+        $form->handle_upload( 'property_invoices', $fields );
         return $fields;
     },
     post_process => sub {
@@ -612,10 +623,14 @@ has_field property_photos => (
 );
 
 has_field property_invoices => (
-    required => 1,
-    type => 'Text',
+    type => 'Upload',
     hint => 'Or estimates where the damage has not yet been repaired. These must be on headed paper, addressed to you and dated',
     label => 'Please provide receipted invoices for repairs',
+    validate_method => sub {
+        my $self = shift;
+        my $c = $self->form->{c};
+        return 1 if $c->req->upload('property_invoices');
+    }
 );
 
 has_page about_you_personal => (
@@ -887,6 +902,11 @@ sub format_for_display {
         } else {
             return "$value->{day}/$value->{month}/$value->{year}";
         }
+    } elsif ( $field->{type} eq 'Upload' ) {
+        if ( ref $value eq 'HASHREF' ) {
+           return join( ',', @{ $value->{filenames} } );
+        }
+        return "";
     }
 
     return $value;
@@ -935,12 +955,12 @@ sub handle_upload {
             return;
         }
         # Then store the file hashes in report->extra along with the original filenames
-        $form->saved_data->{$fieldname} =  $key;
+        $form->saved_data->{$fieldname} = { files => $key, filenames => [ $receipts->raw_basename ] };
         $fields->{$fieldname} = { default => $key, tags => { files => $key, filenames => [ $receipts->raw_basename ] } };
         $form->params->{$fieldname . '_fileid'} = '';
     } elsif ( $saved_data->{$fieldname} ) {
-        my $file = $saved_data->{$fieldname};
-        $fields->{$fieldname} = { default => $file, tags => { files => $file, filenames => [ $file] } };
+        my $file = $saved_data->{$fieldname}->{files};
+        $fields->{$fieldname} = { default => $file, tags => $saved_data->{$fieldname} };
     }
 }
 

@@ -48,6 +48,8 @@
                    FOR photo IN photos ~%]
                     <img align="left" src="/photo/temp.[% photo %]">
                 [% END ~%]
+            [% ELSIF field.type == 'Upload' %]
+                [% field.value.filenames.join(',') %]
             [% ELSE %]
                 [% form.format_for_display(field.name, field.value) | html %]
             [% END %]
