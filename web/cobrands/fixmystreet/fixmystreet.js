@@ -754,10 +754,15 @@ $.extend(fixmystreet.set_up, {
           });
           this.on("success", function(file, xhrResponse) {
             var $upload_fileids = $('input[name=' + $fileid_input + ']', $context);
-            var ids = $upload_fileids.val().split(','),
-                id = (file.server_id = xhrResponse.id),
-                l = ids.push(id),
-                newstr = ids.join(',');
+            var ids = [];
+            // only split if it has a value otherwise you get a spurious empty string
+            // in the array as split returns the whole string if no match
+            if ( $upload_fileids.val() ) {
+                ids = $upload_fileids.val().split(',');
+            }
+            var id = (file.server_id = xhrResponse.id),
+                l = ids.push(id);
+            newstr = ids.join(',');
             $upload_fileids.val(newstr);
           });
           this.on("error", function(file, errorMessage, xhrResponse) {
