@@ -276,12 +276,21 @@
         <span class="govuk-visually-hidden">Error:</span> [% error %]
     </span>
   [% END %]
+  <div id="form_photos" data-upload-field="[% field.id %]_fileid">
   [% IF field.fif %]
-      <img align="left" src="/photo/temp.[% field.fif %]" alt="">
+        [% FOREACH id IN field.fif.split(',') %]
+        <img align="right" src="/photo/temp.[% id %]" alt="">
+        [% END %]
   [% END %]
 
-  <div>
-  <input class="govuk-file-upload js-photo-fields" id="[% field.id %]" name="[% field.id %]" type="file" data-upload-field="[% field.id %]_fileid">
+      <input type="hidden" name="fileid_field" value="[% field.id %]_fileid">
+      <input type="hidden" name="photo_field" value="[% field.id %]">
+      <input class="govuk-file-upload" id="[% field.id %]" name="[% field.id %]" type="file" >
+      [% SET count = field.get_tag('max_photos');
+         WHILE count > 1 ~%]
+         <input class="govuk-file-upload" id="[% field.id %][% count %]" name="[% field.id %][% count %]" type="file" >
+      [% count = count - 1;
+         END ~%]
   </div>
 [% END %]
 

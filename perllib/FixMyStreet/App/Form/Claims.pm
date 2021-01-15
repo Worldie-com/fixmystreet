@@ -386,6 +386,7 @@ has_field describe_cause => (
 
 has_field photos => (
     type => 'Photo',
+    tags => { max_photos => 2 },
     label => 'Please provide two dated photos of the incident',
 );
 
@@ -506,6 +507,7 @@ has_field vehicle_photos_fileid => (
 
 has_field vehicle_photos => (
     type => 'Photo',
+    tags => { max_photos => 2 },
     label => 'Please provide two photos of the damage to the vehicle',
 );
 
@@ -619,6 +621,7 @@ has_field property_photos_fileid => (
 
 has_field property_photos => (
     type => 'Photo',
+    tags => { max_photos => 2 },
     label => 'Please provide two photos of the damage to the property',
 );
 
@@ -928,7 +931,9 @@ sub process_photo {
 
     my $saved_data = $form->saved_data;
     my $fileid = $field . '_fileid';
-    $saved_data->{$field} = $saved_data->{$fileid};
+    my $c = $form->{c};
+    $c->forward('/photo/process_photo');
+    $saved_data->{$field} = $c->stash->{$fileid};
     $saved_data->{$fileid} = '';
 }
 
