@@ -320,7 +320,7 @@ has_field incident_number => (
 
 
 has_page cause => (
-    fields => ['what_cause', 'aware', 'where_cause', 'describe_cause', 'upload_fileid', 'photos', 'continue'],
+    fields => ['what_cause', 'aware', 'where_cause', 'describe_cause', 'photos_fileid', 'photos', 'continue'],
     title => 'What caused the incident?',
     next => sub {
             $_[0]->{what} == 0 ? 'about_vehicle' :
@@ -329,25 +329,17 @@ has_page cause => (
         },
     update_field_list => sub {
         my ($form) = @_;
-        my $saved_data = $form->saved_data;
-        if ($saved_data->{photos}) {
-            $saved_data->{upload_fileid} = $saved_data->{photos};
-            return { upload_fileid => { default => $saved_data->{photos} } };
-        }
-        return {};
+        my $fields = {};
+        $form->update_photo('photos', $fields);
+        return $fields;
     },
     post_process => sub {
             my ($form) = @_;
-            my $c = $form->{c};
-            #$c->forward('/photo/process_photo');
-
-            my $saved_data = $form->saved_data;
-            $saved_data->{photos} = $saved_data->{upload_fileid};
-            $saved_data->{upload_fileid} = '';
+            $form->process_photo('photos');
         },
 );
 
-has_field upload_fileid => (
+has_field photos_fileid => (
     type => 'Hidden'
 );
 
@@ -470,7 +462,7 @@ has_field vat_reg => (
 );
 
 has_page damage_vehicle => (
-    fields => ['vehicle_damage', 'vehicle_upload_fileid', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
+    fields => ['vehicle_damage', 'vehicle_photos_fileid', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
     title => 'What was the damage to the vehicle',
     tags => {
         hide => sub { $_[0]->form->value_nequals('what', 0); }
@@ -480,12 +472,8 @@ has_page damage_vehicle => (
         my ($form) = @_;
         my $fields = {};
         my $c = $form->{c};
-        my $saved_data = $form->saved_data;
-        if ($saved_data->{vehicle_photos}) {
-            $saved_data->{vehicle_upload_fileid} = $saved_data->{vehicle_photos};
-            $fields = { vehicle_upload_fileid => { default => $saved_data->{vehicle_photos} } };
-        }
 
+        $form->update_photo('vehicle_photos', $fields);
         $form->handle_upload( 'vehicle_receipts', $fields );
         $form->handle_upload( 'tyre_receipts', $fields );
 
@@ -493,19 +481,8 @@ has_page damage_vehicle => (
     },
     post_process => sub {
         my ($form) = @_;
-        my $c = $form->{c};
 
-        my $saved_data = $form->saved_data;
-        $saved_data->{vehicle_photos} = $saved_data->{vehicle_upload_fileid};
-        $saved_data->{upload_fileid} = '';
-
-        if ( $form->params->{vehicle_receipts_fileid} ) {
-            $saved_data->{vehicle_receipts} = $form->params->{vehicle_receipts_fileid};
-        }
-        if ( $form->params->{tyre_receipts_fileid} ) {
-            $saved_data->{tyre_receipts} = $form->params->{tyre_receipts_fileid};
-        }
-
+        $form->process_photo('vehicle_photos');
     },
 );
 
@@ -516,7 +493,7 @@ has_field vehicle_damage => (
     label => 'Describe the damage to the vehicle',
 );
 
-has_field vehicle_upload_fileid => (
+has_field vehicle_photos_fileid => (
     required => 1,
     type => 'Hidden',
     validate_method => sub {
@@ -529,7 +506,6 @@ has_field vehicle_upload_fileid => (
 
 has_field vehicle_photos => (
     type => 'Photo',
-    tags => { upload_field => 'vehicle_upload_fileid' },
     label => 'Please provide two photos of the damage to the vehicle',
 );
 
@@ -594,7 +570,7 @@ has_field property_insurance => (
 );
 
 has_page damage_property => (
-    fields => ['property_damage_description', 'upload_fileid', 'upload_fileid', 'property_photos', 'property_invoices', 'continue'],
+    fields => ['property_damage_description', 'property_photos_fileid', 'property_photos', 'property_invoices', 'continue'],
     title => 'What was the damage to the property?',
     tags => {
         hide => sub { $_[0]->form->value_nequals('what', 2); }
@@ -602,22 +578,14 @@ has_page damage_property => (
     next => 'summary',
     update_field_list => sub {
         my ($form) = @_;
-        my $saved_data = $form->saved_data;
-        if ($saved_data->{property_photos}) {
-            $saved_data->{upload_fileid} = $saved_data->{property_photos};
-            return { upload_fileid => { default => $saved_data->{property_photos} } };
-        }
-        return {};
+        my $fields = {};
+        $form->update_photo('property_photos', $fields);
+        return $fields;
     },
     post_process => sub {
-            my ($form) = @_;
-            my $c = $form->{c};
-            #$c->forward('/photo/process_photo');
-
-            my $saved_data = $form->saved_data;
-            $saved_data->{property_photos} = $saved_data->{upload_fileid};
-            $saved_data->{upload_fileid} = '';
-        },
+        my ($form) = @_;
+        $form->process_photo('property_photos');
+    },
 );
 
 has_field property_damage_description => (
@@ -627,9 +595,19 @@ has_field property_damage_description => (
     label => 'Describe the damage to the property',
 );
 
-has_field property_photos => (
+has_field property_photos_fileid => (
     required => 1,
-    type => 'Text',
+    type => 'Hidden',
+    validate_method => sub {
+        my $self = shift;
+        my $value = $self->value;
+        my @parts = split(/,/, $value);
+        return scalar @parts == 2;
+    }
+);
+
+has_field property_photos => (
+    type => 'Photo',
     label => 'Please provide two photos of the damage to the property',
 );
 
@@ -912,6 +890,26 @@ sub format_for_display {
     }
 
     return $value;
+}
+
+sub update_photo {
+    my ($form, $field, $fields) = @_;
+    my $saved_data = $form->saved_data;
+
+    if ($saved_data->{$field}) {
+        my $fileid = $field . '_fileid';
+        $saved_data->{$fileid} = $saved_data->{$field};
+        $fields->{$fileid} = { default => $saved_data->{$field} };
+    }
+}
+
+sub process_photo {
+    my ($form, $field) = @_;
+
+    my $saved_data = $form->saved_data;
+    my $fileid = $field . '_fileid';
+    $saved_data->{$field} = $saved_data->{$fileid};
+    $saved_data->{$fileid} = '';
 }
 
 sub handle_upload {
