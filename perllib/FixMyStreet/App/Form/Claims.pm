@@ -138,10 +138,10 @@ has_page about_fault => (
     fields => ['report_id', 'continue'],
     intro => 'fault_reported.html',
     title => 'About the fault',
-    next => 'where',
     tags => {
         hide => sub { $_[0]->form->value_equals('fault_fixed', 'Yes'); }
     },
+    next => 'when',
 );
 
 has_field report_id => (
