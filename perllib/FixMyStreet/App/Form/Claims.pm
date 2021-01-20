@@ -69,7 +69,10 @@ has_page about_you => (
     next => 'fault_fixed',
 );
 
-with 'FixMyStreet::App::Form::Claims::AboutYou';
+has email_hint => ( is => 'ro', default => 'We’ll only use this to send you updates on your claim' );
+has phone_hint => ( is => 'ro', default => 'We will call you on this number to discuss your claim' );
+
+with 'FixMyStreet::App::Form::AboutYou';
 
 has_field address => (
     required => 1,
