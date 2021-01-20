@@ -2,6 +2,7 @@ package FixMyStreet::App::Form::Claims;
 
 use HTML::FormHandler::Moose;
 extends 'FixMyStreet::App::Form::Wizard';
+use utf8;
 
 has c => ( is => 'ro' );
 
@@ -247,7 +248,7 @@ has_field witnesses => (
 has_field witness_details => (
     type => 'Text',
     widget => 'Textarea',
-    label => 'Please give the witness\' details',
+    label => 'Please give the witness’ details',
 );
 
 has_field report_police => (
@@ -350,7 +351,7 @@ has_field mileage => (
 has_field v5 => (
     required => 1,
     type => 'Text',
-    label => 'Copy of the vehicles V5 Registration Document',
+    label => 'Copy of the vehicle’s V5 Registration Document',
 );
 
 has_field v5_in_name => (
@@ -561,7 +562,7 @@ has_field gp_contact => (
     required => 0,
     type => 'Text',
     widget => 'Textarea',
-    label => 'Please give the name and contact details of the GP or hospital where you recieved medical attention',
+    label => 'Please give the name and contact details of the GP or hospital where you received medical attention',
     required_when => { 'medical_attention' => 1 },
 );
 
