@@ -155,17 +155,21 @@ body.fullwidthpage {
     }
 }
 
-a#geolocate_link {
-    font-family: $body-font;
-    background: url(images/locate-me.png) $left 0 no-repeat;
-    height: 34px;
-    padding-#{$left}: 24px;
-    margin-top: 0.25em;
+.connect__badge--linkedin {
+    background: transparent url('../images/icon-linkedin-SW.png') 0 0 no-repeat;
+    background-size: 32px 32px;
+    background-image: url('../images/icon-linkedin-SW.svg'), none;
+  }
 
-    @media ($high-dpi-screen) {
-        background-image: url(images/locate-me@2.png);
-        background-size: 22px 34px;
-    }
+a#geolocate_link {
+    border-radius: 6px;
+    font-family: $body-font;
+    text-decoration: none;
+    font-weight: bold;
+    background: transparent url("/i/locate-me-arrow-black.svg") 4% 50% no-repeat;
+    padding: 10px 15px 10px 40px;
+    margin-top: 1em;
+    background-image: url("/i/locate-me-arrow-black.svg"), none;
 
     &.loading {
         background: url("/cobrands/fixmystreet/images/spinner-yellow.gif") 100% 33% no-repeat

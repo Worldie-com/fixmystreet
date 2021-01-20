@@ -54,6 +54,12 @@ h1, h2 {
     .form-hint {
         color: $primary_b;
     }
+    a#geolocate_link {
+        border: 1px solid #333333;
+        color: #337b1c;
+        background: transparent url("/i/locate-me-arrow-green.svg") 4% 50% no-repeat;
+        background-image: url("/i/locate-me-arrow-green.png"), none;
+      }
 }
 
 .btn-primary,
