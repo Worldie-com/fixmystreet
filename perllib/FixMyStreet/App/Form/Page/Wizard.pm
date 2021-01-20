@@ -1,4 +1,4 @@
-package FixMyStreet::App::Form::Page::Noise;
+package FixMyStreet::App::Form::Page::Wizard;
 use Moose;
 extends 'FixMyStreet::App::Form::Page::Simple';
 

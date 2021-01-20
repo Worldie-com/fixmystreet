@@ -6,7 +6,7 @@ use utf8;
 
 has c => ( is => 'ro' );
 
-has default_page_type => ( is => 'ro', isa => 'Str', default => 'Claims' );
+has default_page_type => ( is => 'ro', isa => 'Str', default => 'Wizard' );
 
 has finished_action => ( is => 'ro' );
 

@@ -7,7 +7,7 @@ use utf8;
 has c => ( is => 'ro' );
 has addresses => ( is => 'rw');
 
-has default_page_type => ( is => 'ro', isa => 'Str', default => 'Noise' );
+has default_page_type => ( is => 'ro', isa => 'Str', default => 'Wizard' );
 
 before _process_page_array => sub {
     my ($self, $pages) = @_;
