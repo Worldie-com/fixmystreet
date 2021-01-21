@@ -113,7 +113,7 @@ has_page fault_reported => (
         'where'
     },
     tags => {
-        hide => sub { $_[0]->form->saved_data->{fault_fixed} eq 'Yes'; }
+        hide => sub { $_[0]->form->value_equals('fault_fixed', 'Yes'); }
     },
 );
 
@@ -135,7 +135,7 @@ has_page about_fault => (
     title => 'About the fault',
     next => 'where',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{fault_fixed} eq 'Yes'; }
+        hide => sub { $_[0]->form->value_equals('fault_fixed', 'Yes'); }
     },
 );
 
@@ -223,7 +223,7 @@ has_field direction => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     label => 'What direction were you travelling in at the time?',
 );
@@ -241,7 +241,7 @@ has_field in_vehicle => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     label => 'Where you in a vehicle when the incident happened?',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     options => [
         { label => 'Yes', value => 'Yes' },
@@ -253,7 +253,7 @@ has_field speed => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     label => 'What speed was the vehicle travelling?',
 );
@@ -263,7 +263,7 @@ has_field actions => (
     type => 'Text',
     widget => 'Textarea',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     label => 'If you were not driving, what were you doing when the incident happened?',
 );
@@ -289,7 +289,7 @@ has_field witness_details => (
     type => 'Text',
     widget => 'Textarea',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{witnesses} eq 'No' }
+        hide => sub { $_[0]->form->value_equals('witnesses', 'No'); }
     },
     label => 'Please give the witness’ details',
 );
@@ -308,7 +308,7 @@ has_field report_police => (
 has_field incident_number => (
     type => 'Text',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{report_police} eq 'No' }
+        hide => sub { $_[0]->form->value_equals('report_police', 'No'); }
     },
     label => 'What was the incident reference number?',
 );
@@ -374,7 +374,7 @@ has_page about_vehicle => (
     fields => ['make', 'registration', 'mileage', 'v5', 'v5_in_name', 'insurer_address', 'damage_claim', 'vat_reg', 'continue'],
     title => 'About the vehicle',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     next => 'damage_vehicle',
 );
@@ -446,7 +446,7 @@ has_page damage_vehicle => (
     fields => ['vehicle_damage', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
     title => 'What was the damage to the vehicle',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+        hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     next => 'summary',
 );
@@ -486,18 +486,18 @@ has_field tyre_mileage => (
     type => 'Text',
     label => 'Age and Mileage of the tyre(s) at the time of the incident',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{tyre_damage} eq 'No' }
+        hide => sub { $_[0]->form->value_equals('tyre_damage', 'No') }
     },
-    required_when => { 'tyre_damage' => 1 },
+    required_when => { 'tyre_damage' => 'Yes' },
 );
 
 has_field tyre_receipts => (
     type => 'Text',
     label => 'Please provide copy of tyre purchase receipts',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{tyre_damage} eq 'No' }
+        hide => sub { $_[0]->form->value_equals('tyre_damage}', 'No') }
     },
-    required_when => { 'tyre_damage' => 1 },
+    required_when => { 'tyre_damage' => 'Yes' },
 );
 
 has_field tyre_receipts => (
@@ -509,7 +509,7 @@ has_page about_property => (
     fields => ['property_insurance', 'continue'],
     title => 'About the property',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 2; }
+        hide => sub { $_[0]->form->value_nequals('what', 2); }
     },
     next => 'damage_property',
 );
@@ -524,7 +524,7 @@ has_page damage_property => (
     fields => ['property_damage_description', 'property_photos', 'property_invoices', 'continue'],
     title => 'What was the damage to the property?',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 2; }
+        hide => sub { $_[0]->form->value_nequals('what', 2); }
     },
     next => 'summary',
 );
@@ -553,7 +553,7 @@ has_page about_you_personal => (
     fields => ['dob', 'ni_number', 'occupation', 'employer_contact', 'continue'],
     title => 'About you',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 1; }
+        hide => sub { $_[0]->form->value_nequals('what', 1); }
     },
     next => 'injuries',
 );
@@ -611,7 +611,7 @@ has_page injuries => (
     fields => ['describe_injuries', 'medical_attention', 'attention_date', 'gp_contact', 'absent_work', 'absence_dates', 'ongoing_treatment', 'treatment_details', 'continue'],
     title => 'About your injuries',
     tags => {
-        hide => sub { $_[0]->form->saved_data->{what} != 1; }
+        hide => sub { $_[0]->form->value_nequals('what', 1); }
     },
     next => 'summary',
 );
@@ -639,9 +639,9 @@ has_field attention_date => (
     type => 'DateTime',
     hint => 'For example 11 08 2020',
     label => 'Date you received medical attention',
-    required_when => { 'medical_attention' => 1 },
+    required_when => { 'medical_attention' => 'Yes' },
     tags => {
-        hide => sub { $_[0]->form->saved_data->{medical_attention} eq 'No'; }
+        hide => sub { $_[0]->form->value_equals('medical_attention', 'No'); }
     },
     messages => {
         select_invalid_value => 'The incident must be within the last five years',
@@ -672,9 +672,9 @@ has_field gp_contact => (
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give the name and contact details of the GP or hospital where you received medical attention',
-    required_when => { 'medical_attention' => 1 },
+    required_when => { 'medical_attention' => 'Yes' },
     tags => {
-        hide => sub { $_[0]->form->saved_data->{medical_attention} eq 'No'; }
+        hide => sub { $_[0]->form->value_equals('medical_attention', 'No'); }
     },
 );
 
@@ -694,9 +694,9 @@ has_field absence_dates => (
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give dates of absences',
-    required_when => { 'absent_work' => 1 },
+    required_when => { 'absent_work' => 'Yes' },
     tags => {
-        hide => sub { $_[0]->form->saved_data->{absent_work} eq 'No'; }
+        hide => sub { $_[0]->form->value_equals('absent_work', 'No'); }
     },
 );
 
@@ -716,9 +716,9 @@ has_field treatment_details => (
     type => 'Text',
     widget => 'Textarea',
     label => 'Please give treatment details',
-    required_when => { 'ongoing_treatment' => 1 },
+    required_when => { 'ongoing_treatment' => 'Yes' },
     tags => {
-        hide => sub { $_[0]->form->saved_data->{ongoing_treatment} eq 'No'; }
+        hide => sub { $_[0]->form->value_equals('ongoing_treatment', 'No'); }
     },
 );
 
@@ -784,6 +784,20 @@ sub fields_for_display {
      return $things;
 }
 
+sub value_equals {
+    my ($form, $field, $answer) = @_;
+
+    return defined $form->saved_data->{$field} &&
+        $form->saved_data->{$field} eq $answer;
+}
+
+sub value_nequals {
+    my ($form, $field, $answer) = @_;
+
+    return defined $form->saved_data->{$field} &&
+        $form->saved_data->{$field} ne $answer;
+}
+
 sub label_for_field {
     my ($form, $field, $key) = @_;
     foreach ($form->field($field)->options) {
@@ -797,7 +811,13 @@ sub format_for_display {
     if ( $field->{type} eq 'Select' ) {
         return $form->label_for_field($field_name, $value);
     } elsif ( $field->{type} eq 'DateTime' ) {
-        return "$value->{day}/$value->{month}/$value->{year}";
+        # if field was on the last screen then we get the DateTime and not
+        # the hash because it's not been through the freeze/that process
+        if ( ref $value eq 'DateTime' ) {
+            return join( '/', $value->day, $value->month, $value->year);
+        } else {
+            return "$value->{day}/$value->{month}/$value->{year}";
+        }
     }
 
     return $value;
