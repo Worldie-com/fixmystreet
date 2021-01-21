@@ -171,11 +171,29 @@ has_field incident_date => (
     type => 'DateTime',
     hint => 'For example 27 09 2020',
     label => 'What day did the incident happen?',
+    messages => {
+        datetime_invalid => 'Please enter a valid date',
+    },
 );
 
-has_field 'incident_date.year' => ( type => 'Year' );
-has_field 'incident_date.month' => ( type => 'Month' );
-has_field 'incident_date.day' => ( type => 'MonthDay' );
+has_field 'incident_date.year' => (
+    type => 'Year',
+    messages => {
+        select_invalid_value => 'The incident must be within the last five years',
+    },
+);
+has_field 'incident_date.month' => (
+    type => 'Month',
+    messages => {
+        select_invalid_value => 'Please enter a number between 1 and 12',
+    },
+);
+has_field 'incident_date.day' => (
+    type => 'MonthDay',
+    messages => {
+        select_invalid_value => 'Please enter a valid day of the month',
+    },
+);
 
 has_field incident_time => (
     required => 1,
@@ -545,11 +563,29 @@ has_field dob => (
     type => 'DateTime',
     hint => 'For example 23 05 1983',
     label => 'Your date of birth',
+    messages => {
+        datetime_invalid => 'Please enter a valid date',
+    },
 );
 
-has_field 'dob.year' => ( type => 'DOBYear' );
-has_field 'dob.month' => ( type => 'Month' );
-has_field 'dob.day' => ( type => 'MonthDay' );
+has_field 'dob.year' => (
+    type => 'DOBYear',
+    messages => {
+        select_invalid_value => 'You must be over 16 to make a claim',
+    },
+);
+has_field 'dob.month' => (
+    type => 'Month',
+    messages => {
+        select_invalid_value => 'Please enter a number between 1 and 12',
+    },
+);
+has_field 'dob.day' => (
+    type => 'MonthDay',
+    messages => {
+        select_invalid_value => 'Please enter a valid day of the month',
+    },
+);
 
 has_field ni_number => (
     required => 1,
@@ -607,11 +643,29 @@ has_field attention_date => (
     tags => {
         hide => sub { $_[0]->form->saved_data->{medical_attention} eq 'No'; }
     },
+    messages => {
+        select_invalid_value => 'The incident must be within the last five years',
+    },
 );
 
-has_field 'attention_date.year' => ( type => 'Year' );
-has_field 'attention_date.month' => ( type => 'Month' );
-has_field 'attention_date.day' => ( type => 'MonthDay' );
+has_field 'attention_date.year' => (
+    type => 'Year',
+    messages => {
+        select_invalid_value => 'The incident must be within the last five years',
+    },
+);
+has_field 'attention_date.month' => (
+    type => 'Month',
+    messages => {
+        select_invalid_value => 'Please enter a number between 1 and 12',
+    },
+);
+has_field 'attention_date.day' => (
+    type => 'MonthDay',
+    messages => {
+        select_invalid_value => 'Please enter a valid day of the month',
+    },
+);
 
 has_field gp_contact => (
     required => 0,
