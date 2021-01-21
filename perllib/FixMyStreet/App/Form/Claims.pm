@@ -31,6 +31,7 @@ has_page intro => (
     fields => ['start'],
     title => 'Claim for Damages',
     intro => 'start.html',
+    tags => { hide => 1 },
     next => 'what',
 );
 
@@ -58,8 +59,8 @@ has_field claimed_before => (
     required => 1,
     label => 'Have you ever filed a Claim for damages with Buckinghamshire Council?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -86,7 +87,7 @@ has_page fault_fixed => (
     intro => 'fault_fixed.html',
     title => 'About the fault',
     next => sub {
-        $_[0]->{fault_fixed} == 1 ? 'where' :
+        $_[0]->{fault_fixed} eq 'Yes' ? 'where' :
         'fault_reported'
     }
 );
@@ -97,9 +98,9 @@ has_field fault_fixed => (
     required => 1,
     label => 'Has the fault been fixed?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '2' },
-        { label => 'Don\'t know', value => '3' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
+        { label => 'Don’t know', value => 'Unknown' },
     ],
 );
 
@@ -108,9 +109,12 @@ has_page fault_reported => (
     title => 'About the fault',
     intro => 'fault_reported.html',
     next => sub {
-        $_[0]->{fault_reported} == 1 ? 'about_fault' :
+        $_[0]->{fault_reported} eq 'Yes' ? 'about_fault' :
         'where'
-    }
+    },
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{fault_fixed} eq 'Yes'; }
+    },
 );
 
 has_field fault_reported => (
@@ -119,8 +123,8 @@ has_field fault_reported => (
     required => 1,
     label => 'Have you reported the fault to the Council?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '2' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -130,6 +134,9 @@ has_page about_fault => (
     intro => 'fault_reported.html',
     title => 'About the fault',
     next => 'where',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{fault_fixed} eq 'Yes'; }
+    },
 );
 
 has_field report_id => (
@@ -197,6 +204,9 @@ has_field weather => (
 has_field direction => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     label => 'What direction were you travelling in at the time?',
 );
 
@@ -212,15 +222,21 @@ has_field in_vehicle => (
     widget => 'RadioGroup',
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     label => 'Where you in a vehicle when the incident happened?',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
 has_field speed => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     label => 'What speed was the vehicle travelling?',
 );
 
@@ -228,6 +244,9 @@ has_field actions => (
     required_when => { 'what' => sub { $_[1]->form->saved_data->{what} == 0; } },
     type => 'Text',
     widget => 'Textarea',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     label => 'If you were not driving, what were you doing when the incident happened?',
 );
 
@@ -243,14 +262,17 @@ has_field witnesses => (
     required => 1,
     label => 'Were there any witnesses?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
 has_field witness_details => (
     type => 'Text',
     widget => 'Textarea',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{witnesses} eq 'No' }
+    },
     label => 'Please give the witness’ details',
 );
 
@@ -260,13 +282,16 @@ has_field report_police => (
     required => 1,
     label => 'Did you report the incident to the police?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
 has_field incident_number => (
     type => 'Text',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{report_police} eq 'No' }
+    },
     label => 'What was the incident reference number?',
 );
 
@@ -299,8 +324,8 @@ has_field aware => (
     required => 1,
     label => 'Were you aware of it before?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -330,6 +355,9 @@ has_field photos => (
 has_page about_vehicle => (
     fields => ['make', 'registration', 'mileage', 'v5', 'v5_in_name', 'insurer_address', 'damage_claim', 'vat_reg', 'continue'],
     title => 'About the vehicle',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     next => 'damage_vehicle',
 );
 
@@ -363,8 +391,8 @@ has_field v5_in_name => (
     required => 1,
     label => 'Is the V5 document in your name?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -380,8 +408,8 @@ has_field damage_claim => (
     required => 1,
     label => 'Are you making a claim via the insurance company?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -391,14 +419,17 @@ has_field vat_reg => (
     required => 1,
     label => 'Are you registered for VAT?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
 has_page damage_vehicle => (
     fields => ['vehicle_damage', 'vehicle_photos', 'vehicle_receipts', 'tyre_damage', 'tyre_mileage', 'tyre_receipts', 'continue'],
     title => 'What was the damage to the vehicle',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 0; }
+    },
     next => 'summary',
 );
 
@@ -428,20 +459,26 @@ has_field tyre_damage => (
     required => 1,
     label => 'Are you claiming for tyre damage?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
 has_field tyre_mileage => (
     type => 'Text',
     label => 'Age and Mileage of the tyre(s) at the time of the incident',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{tyre_damage} eq 'No' }
+    },
     required_when => { 'tyre_damage' => 1 },
 );
 
 has_field tyre_receipts => (
     type => 'Text',
     label => 'Please provide copy of tyre purchase receipts',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{tyre_damage} eq 'No' }
+    },
     required_when => { 'tyre_damage' => 1 },
 );
 
@@ -453,6 +490,9 @@ has_field tyre_receipts => (
 has_page about_property => (
     fields => ['property_insurance', 'continue'],
     title => 'About the property',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 2; }
+    },
     next => 'damage_property',
 );
 
@@ -465,6 +505,9 @@ has_field property_insurance => (
 has_page damage_property => (
     fields => ['property_damage_description', 'property_photos', 'property_invoices', 'continue'],
     title => 'What was the damage to the property?',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 2; }
+    },
     next => 'summary',
 );
 
@@ -491,6 +534,9 @@ has_field property_invoices => (
 has_page about_you_personal => (
     fields => ['dob', 'ni_number', 'occupation', 'employer_contact', 'continue'],
     title => 'About you',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 1; }
+    },
     next => 'injuries',
 );
 
@@ -528,6 +574,9 @@ has_field employer_contact => (
 has_page injuries => (
     fields => ['describe_injuries', 'medical_attention', 'attention_date', 'gp_contact', 'absent_work', 'absence_dates', 'ongoing_treatment', 'treatment_details', 'continue'],
     title => 'About your injuries',
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{what} != 1; }
+    },
     next => 'summary',
 );
 
@@ -544,8 +593,8 @@ has_field medical_attention => (
     required => 1,
     label => 'Did you seek medical attention?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -555,6 +604,9 @@ has_field attention_date => (
     hint => 'For example 11 08 2020',
     label => 'Date you received medical attention',
     required_when => { 'medical_attention' => 1 },
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{medical_attention} eq 'No'; }
+    },
 );
 
 has_field 'attention_date.year' => ( type => 'Year' );
@@ -567,6 +619,9 @@ has_field gp_contact => (
     widget => 'Textarea',
     label => 'Please give the name and contact details of the GP or hospital where you received medical attention',
     required_when => { 'medical_attention' => 1 },
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{medical_attention} eq 'No'; }
+    },
 );
 
 has_field absent_work => (
@@ -575,8 +630,8 @@ has_field absent_work => (
     required => 1,
     label => 'Were you absent from work due to the incident?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -586,6 +641,9 @@ has_field absence_dates => (
     widget => 'Textarea',
     label => 'Please give dates of absences',
     required_when => { 'absent_work' => 1 },
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{absent_work} eq 'No'; }
+    },
 );
 
 has_field ongoing_treatment => (
@@ -594,8 +652,8 @@ has_field ongoing_treatment => (
     required => 1,
     label => 'Are you having any ongoing treatment?',
     options => [
-        { label => 'Yes', value => '1' },
-        { label => 'No', value => '0' },
+        { label => 'Yes', value => 'Yes' },
+        { label => 'No', value => 'No' },
     ],
 );
 
@@ -605,11 +663,15 @@ has_field treatment_details => (
     widget => 'Textarea',
     label => 'Please give treatment details',
     required_when => { 'ongoing_treatment' => 1 },
+    tags => {
+        hide => sub { $_[0]->form->saved_data->{ongoing_treatment} eq 'No'; }
+    },
 );
 
 
 has_page summary => (
     fields => ['submit'],
+    tags => { hide => 1 },
     title => 'Review',
     template => 'claims/summary.html',
     finished => sub {
@@ -628,6 +690,7 @@ has_page summary => (
 );
 
 has_page done => (
+    tags => { hide => 1 },
     title => 'Submit',
     template => 'claims/confirmation.html',
 );
@@ -635,5 +698,55 @@ has_page done => (
 has_field start => ( type => 'Submit', value => 'Start', element_attr => { class => 'govuk-button' } );
 has_field continue => ( type => 'Submit', value => 'Continue', element_attr => { class => 'govuk-button' } );
 has_field submit => ( type => 'Submit', value => 'Submit', element_attr => { class => 'govuk-button' } );
+
+sub fields_for_display {
+    my ($form) = @_;
+
+     my $things = [];
+     for my $page ( @{ $form->pages } ) {
+         my $x = {
+             stage => $page->{name},
+             title => $page->{title},
+             ( $page->tag_exists('hide') ? ( hide => $page->get_tag('hide') ) : () ),
+             fields => []
+         };
+
+         for my $f ( @{ $page->fields } ) {
+             my $field = $form->field($f);
+             next if $field->type eq 'Submit';
+             push @{$x->{fields}}, {
+                 name => $field->{name},
+                 desc => $field->{label},
+                 type => $field->type,
+                 value => $form->saved_data->{$field->{name}},
+                 ( $field->tag_exists('block') ? ( block => $field->get_tag('block') ) : () ),
+                 ( $field->tag_exists('hide') ? ( hide => $field->get_tag('hide') ) : () ),
+             };
+         }
+
+         push @$things, $x;
+     }
+
+     return $things;
+}
+
+sub label_for_field {
+    my ($form, $field, $key) = @_;
+    foreach ($form->field($field)->options) {
+        return $_->{label} if $_->{value} eq $key;
+    }
+}
+
+sub format_for_display {
+    my ($form, $field_name, $value) = @_;
+    my $field = $form->field($field_name);
+    if ( $field->{type} eq 'Select' ) {
+        return $form->label_for_field($field_name, $value);
+    } elsif ( $field->{type} eq 'DateTime' ) {
+        return "$value->{day}/$value->{month}/$value->{year}";
+    }
+
+    return $value;
+}
 
 1;
