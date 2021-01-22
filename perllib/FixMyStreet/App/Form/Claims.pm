@@ -397,6 +397,13 @@ has_page about_vehicle => (
         hide => sub { $_[0]->form->value_nequals('what', 0); }
     },
     next => 'damage_vehicle',
+    update_field_list => sub {
+        my ($form) = @_;
+        my $fields = {};
+        $form->handle_upload( 'v5', $fields );
+
+        return $fields;
+    },
 );
 
 has_field make => (
@@ -418,9 +425,17 @@ has_field mileage => (
 );
 
 has_field v5 => (
-    required => 1,
-    type => 'Text',
+    validate_when_empty => 1,
+    type => 'FileIdUpload',
     label => 'Copy of the vehicle’s V5 Registration Document',
+    messages => {
+        upload_file_not_found => 'Please provide a copy of the V5 Registration Document',
+    },
+    validate_method => sub {
+        my $self = shift;
+        my $c = $self->form->{c};
+        return 1 if $c->req->upload('v5');
+    }
 );
 
 has_field v5_in_name => (
@@ -512,14 +527,18 @@ has_field vehicle_photos => (
 );
 
 has_field vehicle_receipts=> (
-    type => 'Upload',
+    validate_when_empty => 1,
+    type => 'FileIdUpload',
     label => 'Please provide receipted invoiced for repairs',
     hint => 'Or estimates where the damage has not yet been repaired',
     validate_method => sub {
         my $self = shift;
         my $c = $self->form->{c};
         return 1 if $c->req->upload('vehicle_receipts');
-    }
+    },
+    messages => {
+        upload_file_not_found => 'Please provide a copy of the V5 Registration Document',
+    },
 );
 
 has_field tyre_damage => (
@@ -543,7 +562,8 @@ has_field tyre_mileage => (
 );
 
 has_field tyre_receipts => (
-    type => 'Upload',
+    validate_when_empty => 1,
+    type => 'FileIdUpload',
     label => 'Please provide copy of tyre purchase receipts',
     tags => {
         hide => sub { $_[0]->form->value_equals('tyre_damage}', 'No') }
@@ -553,7 +573,10 @@ has_field tyre_receipts => (
         my $self = shift;
         my $c = $self->form->{c};
         return 1 if $self->form->saved_data->{tyre_damage} == 1 && $c->req->upload('tyre_receipts');
-    }
+    },
+    messages => {
+        upload_file_not_found => 'Please provide a copy of the V5 Registration Document',
+    },
 );
 
 has_page about_property => (
@@ -572,13 +595,17 @@ has_page about_property => (
 );
 
 has_field property_insurance => (
-    type => 'Upload',
+    type => 'FileIdUpload',
+    validate_when_empty => 1,
     label => 'Please provide a copy of the home/contents insurance certificate',
     validate_method => sub {
         my $self = shift;
         my $c = $self->form->{c};
         return 1 if $c->req->upload('property_insurance');
-    }
+    },
+    messages => {
+        upload_file_not_found => 'Please provide a copy of the insurance certificate',
+    },
 );
 
 has_page damage_property => (
@@ -626,14 +653,18 @@ has_field property_photos => (
 );
 
 has_field property_invoices => (
-    type => 'Upload',
+    type => 'FileIdUpload',
+    validate_when_empty => 1,
     hint => 'Or estimates where the damage has not yet been repaired. These must be on headed paper, addressed to you and dated',
     label => 'Please provide receipted invoices for repairs',
     validate_method => sub {
         my $self = shift;
         my $c = $self->form->{c};
         return 1 if $c->req->upload('property_invoices');
-    }
+    },
+    messages => {
+        upload_file_not_found => 'Please provide a copy of the repair invoices',
+    },
 );
 
 has_page about_you_personal => (
@@ -905,7 +936,7 @@ sub format_for_display {
         } else {
             return "$value->{day}/$value->{month}/$value->{year}";
         }
-    } elsif ( $field->{type} eq 'Upload' ) {
+    } elsif ( $field->{type} eq 'FileIdUpload' ) {
         if ( ref $value eq 'HASHREF' ) {
            return join( ',', @{ $value->{filenames} } );
         }

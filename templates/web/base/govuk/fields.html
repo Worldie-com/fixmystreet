@@ -23,7 +23,7 @@
         [% PROCESS date %]
     [% ELSIF field.type == 'Photo' %]
         [% PROCESS photo %]
-    [% ELSIF field.type == 'Upload' %]
+    [% ELSIF field.type == 'Upload' OR field.type == 'FileIdUpload' %]
         [% PROCESS upload %]
     [% ELSE %]
         [% field.html_name %] [% field.widget %] NOT HANDLED
