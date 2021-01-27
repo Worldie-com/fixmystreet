@@ -220,7 +220,7 @@ sub report_form_ajax : Path('ajax') : Args(0) {
 
     my %by_category;
     foreach my $contact (@{$c->stash->{category_options}}) {
-        next if ref $contact eq 'HASH'; # Ignore the 'Pick a category' line
+        next if $contact->category eq _('-- Pick a category --'); # Ignore the 'Pick a category' line
         my $cat = $c->stash->{category} = $contact->category;
         my $body = $c->forward('by_category_ajax_data', [ 'all', $cat ]);
         $by_category{$cat} = $body;
@@ -795,8 +795,9 @@ sub setup_categories_and_bodies : Private {
 
     if (@category_options) {
         # If there's an Other category present, put it at the bottom
+        my $pick = $c->model('DB::Contact')->fake(_('-- Pick a category --'));
         @category_options = (
-            { category => _('-- Pick a category --'), category_display => _('-- Pick a category --'), group => [''] },
+            $pick,
             grep { $_->category ne _('Other') } @category_options );
         push @category_options, $seen{_('Other')} if $seen{_('Other')};
     }

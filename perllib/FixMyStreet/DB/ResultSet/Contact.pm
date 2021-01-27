@@ -7,6 +7,17 @@ use POSIX qw(strcoll);
 
 __PACKAGE__->load_components('Helper::ResultSet::Me');
 
+
+sub fake {
+    my ($rs, $name, $display_name) = @_;
+    $display_name ||= $name;
+    return $rs->new({
+        category => $name,
+        # So the translation code isn't called
+        extra => { display_name => $display_name },
+    });
+}
+
 =head2 not_deleted
 
     $rs = $rs->not_deleted();

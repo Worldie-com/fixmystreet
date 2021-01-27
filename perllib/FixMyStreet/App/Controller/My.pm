@@ -202,11 +202,9 @@ sub setup_page_data : Private {
     @categories = grep { !$seen{$_->category_display}++ } @categories;
     $c->stash->{filter_categories} = \@categories;
 
-    my @contacts = map { {
-        category => $_->category,
-        category_display => $_->category_display,
-        group => [''],
-    } } @categories;
+    my @contacts = map {
+        $c->model("DB::Contact")->fake($_->category, $_->category_display)
+    } @categories;
     $c->forward('/report/stash_category_groups', [ \@contacts ]);
 
     my $pins = $c->stash->{pins};
