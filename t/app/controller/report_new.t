@@ -645,27 +645,32 @@ subtest "category groups" => sub {
         $contact10->update( { extra => { group => 'Roads' } } );
         $mech->get_ok("/report/new?lat=$saved_lat&lon=$saved_lon");
 
-        print $mech->encoded_content;
-        $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements">\s*<label class="inline" for="category_Pavements">Pavements</label>\s*</div>\s*<div>\s*<input[^>]*value="Roads" data-subcategory="Roads">\s*<label class="inline" for="category_Roads">Roads</label>\s*</div>\s*<div>\s*<input[^>]*value='Trees'>\s*<label class="inline" for="category_\d+">Trees</label>\s*</div>\s*</fieldset>});
-        my $options = '<div>\s*<input[^>]*value=\'Potholes\'>\s*<label class="inline" for="subcategory_\d+">Potholes</label>\s*</div>\s*<div>\s*<input[^>]*value=\'Street lighting\'>\s*<label class="inline" for="subcategory_\d+">Street lighting</label>\s*</div>\s*</fieldset>';
-        my $optionsS = '<div>\s*<input[^>]*value=\'Potholes\' checked>\s*<label class="inline" for="subcategory_\d+">Potholes</label>\s*</div>\s*<div>\s*<input[^>]*value=\'Street lighting\'>\s*<label class="inline" for="subcategory_\d+">Street lighting</label>\s*</div>\s*</fieldset>';
+        my $div = '<div[^>]*>\s*';
+        my $pavements_label = '<label[^>]* for="category_Pavements">Pavements</label>\s*';
+        my $roads = '<input[^>]* value="Roads" data-subcategory="Roads">\s*<label[^>]* for="category_Roads">Roads</label>\s*';
+        my $trees_label = '<label [^>]* for="category_\d+">Trees</label>\s*';
+        $mech->content_like(qr{<input[^>]* value="Pavements" data-subcategory="Pavements">\s*$pavements_label</div>\s*$div$roads</div>\s*$div<input[^>]* value='Trees'>\s*$trees_label</div>\s*</fieldset>});
+        my $streetlighting = '<input[^>]*value=\'Street lighting\'>\s*<label[^>]* for="subcategory_\d+">Street lighting</label>\s*</div>\s*';
+        my $potholes_label = '<label[^>]* for="subcategory_\d+">Potholes</label>\s*';
+        my $options = "$div<input[^>]*value=\'Potholes\'>\\s*$potholes_label</div>\\s*$div$streetlighting</fieldset>";
+        my $optionsS = "$div<input[^>]*value=\'Potholes\' checked>\\s*$potholes_label</div>\\s*$div$streetlighting</fieldset>";
         my $fieldset_pavements = '<fieldset[^>]*id="subcategory_Pavements">\s*<legend>Pavements: Subcategory</legend>\s*';
         my $fieldset_roads = '<fieldset[^>]*id="subcategory_Roads">\s*<legend>Roads: Subcategory</legend>\s*';
         $mech->content_like(qr{$fieldset_pavements$options});
         $mech->content_like(qr{$fieldset_roads$options});
         foreach my $key ('category', 'filter_group') { # Server-submission of top-level, or clicking on map with hidden field
             $mech->get_ok("/report/new?lat=$saved_lat&lon=$saved_lon&$key=Pavements");
-            $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements" checked>\s*<label class="inline" for="category_Pavements">Pavements</label>\s*</div>\s*<div>\s*<input[^>]*value="Roads" data-subcategory="Roads">\s*<label class="inline" for="category_Roads">Roads</label>\s*</div>\s*<div>\s*<input[^>]*value='Trees'>\s*<label class="inline" for="category_\d+">Trees</label>\s*</div>\s*</fieldset>});
+            $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements" checked>\s*$pavements_label</div>\s*$div$roads</div>\s*$div<input[^>]*value='Trees'>\s*$trees_label</div>\s*</fieldset>});
             $mech->content_like(qr{$fieldset_pavements$options});
             $mech->content_like(qr{$fieldset_roads$options});
         }
         $mech->get_ok("/report/new?lat=$saved_lat&lon=$saved_lon&category=Trees");
-        $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements">\s*<label class="inline" for="category_Pavements">Pavements</label>\s*</div>\s*<div>\s*<input[^>]*value="Roads" data-subcategory="Roads">\s*<label class="inline" for="category_Roads">Roads</label>\s*</div>\s*<div>\s*<input[^>]*value='Trees' checked>\s*<label class="inline" for="category_\d+">Trees</label>\s*</div>\s*</fieldset>});
+        $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements">\s*$pavements_label</div>\s*$div$roads</div>\s*$div<input[^>]*value='Trees' checked>\s*$trees_label</div>\s*</fieldset>});
         $mech->content_like(qr{$fieldset_pavements$options});
         $mech->content_like(qr{$fieldset_roads$options});
         # Server submission of pavement subcategory
         $mech->get_ok("/report/new?lat=$saved_lat&lon=$saved_lon&category=Pavements&category.Pavements=Potholes");
-        $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements" checked>\s*<label class="inline" for="category_Pavements">Pavements</label>\s*</div>\s*<div>\s*<input[^>]*value="Roads" data-subcategory="Roads">\s*<label class="inline" for="category_Roads">Roads</label>\s*</div>\s*<div>\s*<input[^>]*value='Trees'>\s*<label class="inline" for="category_\d+">Trees</label>\s*</div>\s*</fieldset>});
+        $mech->content_like(qr{<input[^>]*value="Pavements" data-subcategory="Pavements" checked>\s*$pavements_label</div>\s*$div$roads</div>\s*$div<input[^>]*value='Trees'>\s*$trees_label</div>\s*</fieldset>});
         $mech->content_like(qr{$fieldset_pavements$optionsS});
         $mech->content_like(qr{$fieldset_roads$options});
     };

@@ -5,9 +5,9 @@
         <legend>[% group.name %]: [% loc('Subcategory') %]</legend>
       [%~ FOREACH cat IN group.categories ~%]
         [% cat_lc = cat.category | lower =%]
-        <div>
-        <input required id="subcategory_[% cat.id %]" type="radio" name="category.[% group.id %]" value='[% cat.category %]'[% ' checked' IF ( report.category == cat.category || category_lc == cat_lc ) AND ( NOT filter_group OR filter_group == group.name ) ~%]>
-        <label class="inline" for="subcategory_[% cat.id %]">[% cat.category_display %]
+        <div class="govuk-radios__item">
+        <input class="govuk-radios__input" required id="subcategory_[% cat.id %]" type="radio" name="category.[% group.id %]" value='[% cat.category %]'[% ' checked' IF ( report.category == cat.category || category_lc == cat_lc ) AND ( NOT filter_group OR filter_group == group.name ) ~%]>
+        <label class="govuk-radios__label" for="subcategory_[% cat.id %]">[% cat.category_display %]
             [%~ IF cat.get_extra_metadata('help_text') %] ([% cat.get_extra_metadata('help_text') %])[% END ~%]
         </label>
         </div>

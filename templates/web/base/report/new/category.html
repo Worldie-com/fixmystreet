@@ -28,14 +28,14 @@ END
     >
         <legend id="form_category_legend">[%~ form_category_label OR loc('Category') ~%]</legend>
         [%~ FOREACH group_or_cat IN category_groups ~%]
-            <div>
+            <div class="govuk-radios__item">
           [% IF group_or_cat.name %]
-                <input required id="category_[% group_or_cat.id %]" type="radio" name="category" value="[% group_or_cat.name %]" data-subcategory="[% group_or_cat.id %]"[% ' checked' IF filter_group == group_or_cat.name %]>
-            <label class="inline" for="category_[% group_or_cat.id %]">[% group_or_cat.name %]</label>
+                <input class="govuk-radios__input" required id="category_[% group_or_cat.id %]" type="radio" name="category" value="[% group_or_cat.name %]" data-subcategory="[% group_or_cat.id %]"[% ' checked' IF filter_group == group_or_cat.name %]>
+            <label class="govuk-radios__label" for="category_[% group_or_cat.id %]">[% group_or_cat.name %]</label>
           [% ELSE # A category not in a group %]
             [% cat_lc = group_or_cat.category | lower =%]
-            <input required id="category_[% group_or_cat.id %]" type="radio" name="category" value='[% group_or_cat.category %]'[% ' checked' IF ( report.category == group_or_cat.category || category_lc == cat_lc ) AND NOT filter_group ~%]>
-            <label class="inline" for="category_[% group_or_cat.id %]">[% group_or_cat.category_display %]
+            <input class="govuk-radios__input" required id="category_[% group_or_cat.id %]" type="radio" name="category" value='[% group_or_cat.category %]'[% ' checked' IF ( report.category == group_or_cat.category || category_lc == cat_lc ) AND NOT filter_group ~%]>
+            <label class="govuk-radios__label" for="category_[% group_or_cat.id %]">[% group_or_cat.category_display %]
             [%~ IF group_or_cat.get_extra_metadata('help_text') %]
                 ([% group_or_cat.get_extra_metadata('help_text') %])
             [% END ~%]

@@ -2867,3 +2867,18 @@ $emergency-message-border: 1px solid #525252 !default;
 @import "_dashboard";
 @import "_top-banner";
 @import "_search-help";
+
+.govuk-radios__label{font-weight:400;line-height:1.25;margin-top:-2px;margin-bottom:0;display:inline-block;padding:13px 15px 13px 1px;cursor:pointer;touch-action:manipulation;float:left}
+.govuk-radios__label:before{content:"";box-sizing:border-box;position:absolute;top:8px;left:0;width:24px;height:24px;border:2px solid currentColor;border-radius:50%;background:transparent}
+.govuk-radios__label:after{content:"";position:absolute;top:15px;left:7px;width:0;height:0;border:5px solid currentColor;border-radius:50%;opacity:0;background:currentColor}
+.govuk-radios__item{font-weight:400;line-height:1.25;display:block;position:relative;min-height:0;margin-bottom:0;padding-left:34px;clear:left;float:left}
+.govuk-radios__item:after{content:"";display:block;clear:both}
+.govuk-radios__input{cursor:pointer;position:absolute;z-index:1;top:-2px;left:-10px;width:44px;height:44px;margin:0;opacity:0}
+.govuk-radios__input:focus + .govuk-radios__label:before{border-width:4px;box-shadow:0 0 0 4px #fd0}
+.govuk-radios__input:checked + .govuk-radios__label:after{opacity:1}
+.govuk-radios__item:hover .govuk-radios__input + .govuk-radios__label:before{box-shadow:0 0 0 10px #b1b4b6}
+.govuk-radios__item:hover .govuk-radios__input:focus + .govuk-radios__label:before{box-shadow:0 0 0 4px #fd0,0 0 0 10px #b1b4b6}
+@media (hover: none), (pointer: coarse){
+    .govuk-radios__item:hover .govuk-radios__input + .govuk-radios__label:before{box-shadow:initial}
+    .govuk-radios__item:hover .govuk-radios__input:focus + .govuk-radios__label:before{box-shadow:0 0 0 4px #fd0}
+}
