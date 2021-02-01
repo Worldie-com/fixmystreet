@@ -81,7 +81,7 @@ describe('Regression tests', function() {
       cy.wait('@report-ajax');
       cy.pickCategory('Licensing');
       cy.get('.js-reporting-page--next:visible').click();
-      cy.get('[id=subcategory_Licensing]').select('Skips');
+      cy.get('#subcategory_Licensing label').contains('Skips').click();
       cy.get('.js-reporting-page--next:visible').click();
       cy.get('[name=start_date').type('2019-01-01');
       cy.get('.js-reporting-page--next:visible').click();
